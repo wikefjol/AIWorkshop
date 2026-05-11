@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /c/Users/willi/repos/WeiceIT/AIWorkshop -maxdepth 3 -not -path */.git*)",
       "WebSearch",
       "Bash(go mod:*)",
       "Bash(where go:*)",
