@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Audit Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 min-h-screen fixed">
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-gray-900">Subscription Audit</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="/" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors {{if eq .ActivePage "dashboard"}}bg-gray-100 font-semibold{{end}}">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="/subscriptions" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors {{if eq .ActivePage "subscriptions"}}bg-gray-100 font-semibold{{end}}">
+                    <i data-lucide="credit-card" class="w-5 h-5 mr-3"></i>
+                    Subscriptions
+                </a>
+                <a href="#" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                    Settings
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-64 flex-1 p-8">
+            {{template "content" .}}
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    {{block "scripts" .}}{{end}}
+</body>
+</html>

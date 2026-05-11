@@ -1,0 +1,109 @@
+{{define "content"}}
+<div class="space-y-6">
+    <!-- Hero Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Monthly Cost</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{printf "%.2f" .Stats.TotalMonthlyCost}} {{index .Subscriptions 0}.Currency}}</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="dollar-sign" class="w-6 h-6 text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Annual Cost</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{printf "%.2f" .Stats.TotalAnnualCost}} {{index .Subscriptions 0}.Currency}}</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="calendar" class="w-6 h-6 text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Active Subscriptions</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{.Stats.ActiveCount}}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="layers" class="w-6 h-6 text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Renewals -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Category Breakdown Chart -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Spending by Category</h2>
+            <div class="h-64">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Upcoming Renewals -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Upcoming Renewals</h2>
+            {{if .Renewals}}
+            <div class="space-y-3">
+                {{range .Renewals}}
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-900">{{.Name}}</p>
+                        <p class="text-sm text-gray-500">{{.NextBillingDate.Format "Jan 2, 2006"}}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-medium text-gray-900">{{printf "%.2f" .Cost}} {{.Currency}}</p>
+                        <p class="text-sm text-gray-500">{{.Frequency}}</p>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <p class="text-gray-500 text-center py-8">No upcoming renewals in the next 7 days</p>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+{{define "scripts"}}
+<script>
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const data = {{.CategoryBreakdown}};
+    const labels = data.map(d => d.category.charAt(0).toUpperCase() + d.category.slice(1));
+    const values = data.map(d => d.amount);
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true }
+                }
+            }
+        }
+    });
+</script>
+{{end}}
+{{end}}
