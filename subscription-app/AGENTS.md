@@ -1,0 +1,84 @@
+# 📋 Shared Spec: Subscription Audit Dashboard
+
+This is the shared specification for all frameworks in the Subscription Audit Dashboard workshop. Every framework implementation must match this spec exactly.
+
+## 1. Project Overview
+**Goal:** Build a personal finance web application that allows users to track recurring subscriptions, visualize their spending habits, and calculate the true annual cost of their subscriptions.
+
+**Target User:** Individuals looking to reduce "subscription creep" and understand their monthly burn rate.
+
+**Reference Implementation:** SvelteKit — all other frameworks must match its UI/UX.
+
+## 2. Data Model (All Frameworks)
+
+All frameworks use the **exact same schema**:
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | String (UUID) | Unique identifier |
+| `name` | String | Name of service (e.g., "Netflix") |
+| `cost` | Float | Cost per billing cycle |
+| `currency` | String | Default to "SEK" |
+| `frequency` | Enum | `daily`, `weekly`, `monthly`, `yearly` |
+| `category` | Enum | `streaming`, `software`, `utilities`, `health`, `other` |
+| `status` | Enum | `active`, `cancelled` |
+| `startDate` | Date | When the subscription started |
+| `nextBillingDate` | Date | When the next payment is due |
+
+Database: SQLite for all frameworks.
+
+## 3. UI/UX Specification
+
+All frameworks must produce the **same visual output**. Match the SvelteKit reference implementation exactly.
+
+### 3.1 Layout
+- **Sidebar Navigation:** Links to "Dashboard", "Subscriptions", "Settings".
+- **Main Content Area:** Clean, white background with subtle gray borders for cards.
+- **Structure:** Responsive grid layout.
+
+### 3.2 Dashboard View
+1. **Hero Stats Cards (Top Row):**
+   - **Total Monthly Cost:** Sum of all active monthly equivalents.
+   - **Total Annual Cost:** Projected yearly spend.
+   - **Active Count:** Number of active subscriptions.
+2. **Spending Breakdown (Left Column):**
+   - A **Donut Chart** showing spending distribution by `category`.
+3. **Upcoming Renewals (Right Column):**
+   - A list of subscriptions billing in the next 7 days, sorted by date.
+
+### 3.3 Subscription List View
+- A **Data Table** displaying all subscriptions.
+- **Columns:** Name, Category, Cost, Frequency, Annual Equivalent, Status, Actions (Edit/Delete).
+- **Filters:** Filter by `category` or `status` using URL query parameters.
+- **Sort:** Sortable by `cost` (high to low).
+
+### 3.4 Add/Edit Modal
+- A form overlay to add or edit a subscription.
+- **Fields:** Name, Cost, Frequency (Dropdown), Category (Dropdown), Start Date.
+- **Validation:** Cost must be > 0. Name is required.
+
+## 4. Shared Business Logic
+
+### Annual Equivalent Calculation
+Normalize all costs to monthly and annual views:
+- **Daily:** `Cost * 365` (Annual)
+- **Weekly:** `Cost * 52` (Annual)
+- **Monthly:** `Cost * 12` (Annual)
+- **Yearly:** `Cost * 1` (Annual)
+
+### "Savings Potential" Feature (Bonus)
+- If a subscription has been active for > 1 year, display a "Cancel & Save" button that shows the annual cost in red to encourage cancellation.
+
+## 5. Design Reference
+
+The SvelteKit implementation is the **design reference**. All other frameworks must match:
+- Color palette (Tailwind CSS defaults)
+- Typography and spacing
+- Card styling (white background, subtle gray borders)
+- Chart styling and colors
+- Button styles and hover states
+- Table styling and sorting indicators
+- Modal/dialog styling
+- Responsive breakpoints
+
+Use the SvelteKit app as a visual reference when building other frameworks. Take screenshots or run the SvelteKit app side-by-side during development.
