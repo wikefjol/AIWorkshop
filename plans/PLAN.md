@@ -10,62 +10,29 @@
 ## 2. Folder Structure
 ```
 AIWorkshop/
-├── PLAN.md                           ← Original SvelteKit plan (keep as reference)
-├── LICENSE
 ├── subscription-app/
-│   ├── AGENTS.md                     ← Shared spec (Claude Code)
-│   ├── .github/copilot-instructions.md  ← Copilot shared spec
-│   ├── .cursorrules                  ← Cursor shared spec
-│   ├── sveltekit/                    ← Reference implementation (build first)
-│   │   ├── AGENTS.md                 ← Framework-specific instructions
-│   │   ├── .github/copilot-instructions.md
-│   │   ├── .cursorrules
-│   │   ├── package.json
-│   │   ├── src/
-│   │   └── ...
-│   ├── go/                           ← Go-lang version (build later)
-│   │   ├── AGENTS.md
-│   │   ├── .github/copilot-instructions.md
-│   │   ├── .cursorrules
-│   │   └── ...
-│   ├── blazor/                       ← .NET/Blazor version (build later)
-│   │   ├── AGENTS.md
-│   │   ├── .github/copilot-instructions.md
-│   │   ├── .cursorrules
-│   │   └── ...
-│   └── react/                        ← React version (build later)
-│       ├── AGENTS.md
-│       ├── .github/copilot-instructions.md
-│       ├── .cursorrules
-│       └── ...
+│   ├── PLAN.md                        ← Master plan (this file)
+│   ├── AGENTS.md                      ← Shared spec (data model, UI/UX, business logic)
+│   ├── sveltekit/                     ← SvelteKit reference implementation (build first)
+│   │   └── AGENTS.md                  ← SvelteKit-specific instructions
+│   ├── go/                            ← Go-lang version (build later)
+│   │   └── AGENTS.md                  ← Go-specific instructions
+│   ├── blazor/                        ← .NET/Blazor version (build later)
+│   │   └── AGENTS.md                  ← Blazor-specific instructions
+│   └── react/                         ← React version (build later)
+│       └── AGENTS.md                  ← React-specific instructions
 ```
 
 Each framework folder is **fully self-contained** with its own dependencies, build system, and project structure.
 
 ### 2.1 AI Instruction Files
 
-Each framework folder has its own set of AI instruction files, plus shared files at the `subscription-app/` root level. This ensures compatibility across **Claude Code**, **GitHub Copilot**, and **Cursor**.
+| File | Location | Contents |
+| :--- | :--- | :--- |
+| `AGENTS.md` | `subscription-app/` (root) | Shared spec: data model, UI/UX, business logic |
+| `AGENTS.md` | Per-framework folder | Framework-specific: tech stack, setup, implementation steps |
 
-| File | AI Tools that Read It | Location | Contents |
-| :--- | :--- | :--- | :--- |
-| `AGENTS.md` | Claude Code, Copilot | Root + per-framework | Primary instruction file |
-| `.github/copilot-instructions.md` | GitHub Copilot | Root + per-framework | Copilot-specific instructions |
-| `.cursorrules` | Cursor | Root + per-framework | Cursor-specific rules |
-
-**Root-level files** (`subscription-app/`) — Shared across all frameworks:
-- App overview & goal
-- Data model (schema)
-- UI/UX specification (layout, views, components)
-- Business logic (calculations)
-- Reference to SvelteKit as the design standard
-
-**Per-framework files** — Specific to each framework:
-- Tech stack & dependencies
-- Setup commands
-- Implementation steps (broken into phases)
-- How to match the shared UI/UX
-
-When building a framework, AI tools will read both the shared root files and the framework-specific files to get the complete picture.
+When building a framework, AI tools will read both the shared root `AGENTS.md` and the framework-specific `AGENTS.md` to get the complete picture.
 
 ## 3. Frameworks & Tech Stack
 
@@ -80,38 +47,38 @@ When building a framework, AI tools will read both the shared root files and the
 | Charts | `svelte-recharts` |
 | Database | SQLite + Drizzle ORM |
 
-### 3.2 Go (TBD)
+### 3.2 Go
 | Aspect | Choice |
 | :--- | :--- |
-| Framework | [TBD — e.g., Htmx + Go templates, or full web framework] |
+| Framework | Chi router + Go templates |
 | Language | Go |
 | Styling | Tailwind CSS (same as reference) |
-| UI Components | [Match shadcn-svelte visually] |
-| Icons | Same icon set |
-| Charts | [TBD — chart library for Go frontend] |
-| Database | SQLite + [TBD — Go ORM] |
+| UI Components | Custom components matching shadcn-svelte visually |
+| Icons | Lucide icons (SVG) |
+| Charts | Chart.js via inline JS or go-chart |
+| Database | SQLite + golang-migrate + sqlc |
 
-### 3.3 .NET/Blazor (TBD)
+### 3.3 .NET/Blazor
 | Aspect | Choice |
 | :--- | :--- |
-| Framework | Blazor (Server or WebAssembly) |
+| Framework | Blazor Server (.NET 8+) |
 | Language | C# |
-| Styling | Tailwind CSS (same as reference) |
-| UI Components | [Match shadcn-svelte visually — e.g., MudBlazor or custom] |
-| Icons | Same icon set |
-| Charts | [TBD — Blazor chart library] |
+| Styling | Tailwind CSS (via Tailwind.NET or postcss) |
+| UI Components | MudBlazor or custom matching shadcn-svelte |
+| Icons | Lucide icons |
+| Charts | Chart.js for Blazor |
 | Database | SQLite + Entity Framework Core |
 
-### 3.4 React (TBD)
+### 3.4 React
 | Aspect | Choice |
 | :--- | :--- |
-| Framework | Next.js or Vite + React |
+| Framework | Vite + React |
 | Language | TypeScript |
-| Styling | Tailwind CSS (same as reference) |
-| UI Components | `shadcn/ui` (React version — same visual design) |
+| Styling | Tailwind CSS |
+| UI Components | `shadcn/ui` (same visual design as SvelteKit) |
 | Icons | `lucide-react` |
-| Charts | [TBD — match svelte-recharts visually] |
-| Database | SQLite + Drizzle ORM (same as SvelteKit) |
+| Charts | Recharts (same visual style as svelte-recharts) |
+| Database | SQLite + Drizzle ORM (via SvelteKit-like API layer) |
 
 ## 4. Shared Data Model (All Frameworks)
 
@@ -122,7 +89,7 @@ All frameworks use the **exact same schema**:
 | `id` | String (UUID) | Unique identifier |
 | `name` | String | Name of service (e.g., "Netflix") |
 | `cost` | Float | Cost per billing cycle |
-| `currency` | String | Default to "USD" |
+| `currency` | String | Default to "SEK" |
 | `frequency` | Enum | `daily`, `weekly`, `monthly`, `yearly` |
 | `category` | Enum | `streaming`, `software`, `utilities`, `health`, `other` |
 | `status` | Enum | `active`, `cancelled` |
@@ -197,7 +164,7 @@ Build the complete app. This becomes the visual and functional reference for all
 > Replicate the SvelteKit app's UI and functionality using Blazor. Match the same layout, colors, chart styles, and interactions.
 
 ### Phase 4: React (Future)
-> Replicate the SvelteKit app's UI and functionality using React/Next.js. Use `shadcn/ui` (React) for visual parity.
+> Replicate the SvelteKit app's UI and functionality using React/Vite. Use `shadcn/ui` (React) for visual parity.
 
 ---
 
