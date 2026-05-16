@@ -2,7 +2,9 @@
 
 Build the **Subscription Audit Dashboard** using Go. Match the SvelteKit reference implementation's UI/UX exactly.
 
-**Read first:** `subscription-app/AGENTS.md` for the shared data model, UI/UX spec, and business logic.
+**Read first:** 
+- `subscription-app/AGENTS.md` for the shared data model, UI/UX spec, and business logic
+- `plans/PLAN.md` for the staged implementation phases applicable to all frameworks
 
 ---
 
@@ -85,70 +87,53 @@ templates/
 
 ---
 
-## Implementation Steps
-
-### Phase 1: Setup & Database
-1. Initialize Go module with Chi router.
-2. Set up SQLite database connection in `internal/db/database.go`.
-3. Create migrations for the `subscriptions` table matching the shared schema.
-4. Seed 5 sample subscriptions via migration or on first connection.
-5. Configure Chi router with routes for all pages and API endpoints.
-
-### Phase 2: HTTP Handlers & API
-1. Create `internal/handler/page.go` for page rendering:
-   - `GET /` → Dashboard
-   - `GET /subscriptions` → Subscription list
-   - `GET /settings` → Settings
-2. Create `internal/handler/subscription.go` for API:
-   - `GET /api/subscriptions` → List all
-   - `GET /api/subscriptions/:id` → Get one
-   - `POST /api/subscriptions` → Create
-   - `PUT /api/subscriptions/:id` → Update
-   - `DELETE /api/subscriptions/:id` → Delete
-3. Use `encoding/json` for API responses: `{ "success": true, "data": {...} }`.
-4. Implement input validation in handlers (check required fields, cost > 0).
-
-### Phase 3: Dashboard Template
-1. Build `templates/base.html` with sidebar navigation (Dashboard, Subscriptions, Settings).
-2. Build `templates/dashboard.html`:
-   - 3 stat cards using `partials/stat-card.html`.
-   - Chart.js donut chart in left column (render canvas element).
-   - Upcoming renewals list in right column using `partials/renewal-list.html`.
-3. Pass computed stats from handler to template.
-
-### Phase 4: Subscription List Template
-1. Build `templates/subscriptions.html` with HTML table.
-2. Add filter dropdowns (category, status) — use query parameters.
-3. Add sortable column headers (sort by clicking, use `?sort=cost&order=desc`).
-4. Add Edit/Delete buttons per row.
-5. Build `templates/modal/subscription-form.html` for add/edit modal.
-6. Use JavaScript (vanilla or minimal) for modal open/close and form submission via fetch API.
-
-### Phase 5: Settings & Polish
-1. Build `templates/settings.html` with "Reset Data" button.
-2. Wire up Tailwind CSS (use CDN for simplicity in workshop, or build with postcss).
-3. Add Chart.js configuration for donut chart with category colors.
-4. Implement client-side form validation in JavaScript.
-5. Ensure responsive layout (mobile-friendly sidebar).
-
----
-
 ## Key Implementation Notes
 
-- **Templates:** Use Go's `html/template` package. Define template sets per page.
-- **Database queries:** Use raw SQL with `database/sql` — keep it simple for the workshop.
-- **Calculations:** Put `AnnualEquivalent()`, `MonthlyEquivalent()`, `TotalMonthly()` in `internal/util/calc.go`.
-- **Chart.js:** Load via CDN (`<script src="https://cdn.jsdelivr.net/npm/chart.js">`). Configure donut chart in `static/js/main.js`.
-- **Lucide icons:** Copy SVG paths from lucide.dev and inline them in templates.
-- **Static files:** Serve `static/` directory with Chi's `fs.Handler`.
-- **Error handling:** Return JSON `{ "success": false, "error": "message" }` for API errors.
-- **Date handling:** Use `time.Parse("2006-01-02", ...)` for date strings from forms.
+### Router & Handlers
+- Use **Chi router** (`github.com/go-chi/chi/v5`) for routing.
+- Split handlers into two files:
+  - `internal/handler/page.go` — page rendering (`GET /`, `/subscriptions`, `/settings`)
+  - `internal/handler/subscription.go` — API CRUD endpoints
 
----
+### Database & Migrations
+- **SQLite driver:** `github.com/mattn/go-sqlite3` (CGO required) or `modernc.org/sqlite` (pure Go).
+- **Migrations:** `github.com/golang-migrate/migrate/v4` with SQL migration files in `migrations/`.
+- Run migrations on startup — ensure tables exist before the server starts serving.
+
+### Templates & Static Files
+- Use Go's `html/template` package for rendering pages.
+- Define a base template set per page layout; use `template.ParseGlob` for bulk loading.
+- Load Chart.js via CDN in `base.html`: `<script src="https://cdn.jsdelivr.net/npm/chart.js">`.
+- Serve static files (`css/`, `js/`) with Chi's `fs.Handler`.
+
+### UI Patterns (Go Templates)
+| Component | Template file | Notes |
+|-----------|-------------|-------|
+| Layout / Sidebar | `templates/base.html` | Wrap all pages; set `active` class on nav links based on URL |
+| Stat Card | `templates/partials/stat-card.html` | Reusable partial, passed title/value/icon via template params |
+| Donut Chart | Inline in `templates/dashboard.html` | Canvas element + `<script>` block with Chart.js config in `static/js/main.js` |
+| Renewal List | `templates/partials/renewal-list.html` | Range over upcoming renewals slice |
+| Table | `templates/subscriptions.html` | HTML table, sort headers use query params (`?sort=cost&order=desc`) |
+| Modal Form | `templates/modal/subscription-form.html` | Hidden by default; toggle via vanilla JS fetch + onclick handlers |
+
+### API Responses
+- Return consistent JSON: `{ "success": boolean, "data"?: any, "error"?: string }`.
+- Use `encoding/json` — wrap all responses with a helper to avoid repetition.
+- Validation in handlers: check required fields (name non-empty, cost > 0).
+
+### Business Logic
+- Put calculations in `internal/util/calc.go`:
+  - `AnnualEquivalent(cost float64, freq string) float64`
+  - `MonthlyEquivalent(cost float64, freq string) float64`
+  - `TotalMonthly(subscriptions []Subscription) float64`
+
+### Icons & Styling
+- **Lucide icons:** Copy SVG paths from lucide.dev and inline them in templates.
+- **Tailwind CSS:** Use CDN for workshop simplicity; see Tailwind setup below.
 
 ## Tailwind CSS Setup (Simple)
 
-For the workshop, use Tailwind via CDN in `base.html`:
+For the workshop, use via CDN in `base.html`:
 ```html
 <script src="https://cdn.tailwindcss.com"></script>
 ```
@@ -162,8 +147,6 @@ With `static/css/input.css`:
 ```css
 @import "tailwindcss";
 ```
-
----
 
 ## Reference
 

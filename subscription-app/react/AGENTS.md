@@ -2,7 +2,9 @@
 
 Build the **Subscription Audit Dashboard** using Vite + React. Match the SvelteKit reference implementation's UI/UX exactly.
 
-**Read first:** `subscription-app/AGENTS.md` for the shared data model, UI/UX spec, and business logic.
+**Read first:** 
+- `subscription-app/AGENTS.md` for the shared data model, UI/UX spec, and business logic
+- `plans/PLAN.md` for the staged implementation phases applicable to all frameworks
 
 ---
 
@@ -77,61 +79,41 @@ src/
 
 ---
 
-## Implementation Steps
-
-### Phase 1: Setup & Database
-1. Initialize Vite + React project with TypeScript and Tailwind CSS.
-2. Configure `tailwind.config.js` with the color palette from the shared spec.
-3. Set up Drizzle ORM schema (`src/lib/db/schema.ts`) matching the shared data model.
-4. Create SQLite database connection (`src/lib/db/index.ts`) with auto-migration on startup.
-5. Seed 5 sample subscriptions if the table is empty.
-
-### Phase 2: Data Layer + API
-1. Create `src/lib/hooks/useSubscriptions.ts` with React Query or custom hooks:
-   - `useSubscriptions()` — fetch all subscriptions
-   - `useCreateSubscription()` — create mutation
-   - `useUpdateSubscription()` — update mutation
-   - `useDeleteSubscription()` — delete mutation
-2. Implement CRUD operations using `better-sqlite3` (direct DB access in Vite dev) or a simple Express/FASTIFY API layer.
-3. Use `zod` for schema validation.
-4. Return typed responses matching the shared data model.
-
-### Phase 3: Dashboard Page
-1. Build `Layout.tsx` with sidebar navigation.
-2. Build `StatCard.tsx` for hero stats.
-3. Create `Dashboard.tsx`:
-   - Display 3 stat cards (monthly cost, annual cost, active count).
-   - Left column: `DonutChart.tsx` with `recharts` (PieChart + Pie + Cell).
-   - Right column: `RenewalList.tsx` showing next 7 days.
-4. Fetch data using the custom hooks.
-
-### Phase 4: Subscription List Page
-1. Build `SubscriptionTable.tsx` with sortable columns (use `@tanstack/react-table` or custom sorting).
-2. Add category and status filter dropdowns (MudBlazor-style or shadcn Select).
-3. Create `SubscriptionModal.tsx` for add/edit (use shadcn Dialog).
-4. Wire up Edit/Delete actions with confirmation dialogs.
-5. Implement URL query params for filters and sort order.
-
-### Phase 5: Settings & Polish
-1. Build `Settings.tsx` with "Reset Data" button.
-2. Add client-side form validation with `zod` + React Hook Form.
-3. Ensure responsive design (mobile sidebar collapse).
-4. Add loading states and error boundaries.
-5. Test all CRUD operations end-to-end.
-
----
-
 ## Key Implementation Notes
 
-- **Database:** Since this is a client-side framework, use `better-sqlite3` in a Node.js helper or set up a minimal API server (Express/Fastify) for the data layer.
-- **Calculations:** Put `annualEquivalent()`, `monthlyEquivalent()`, and `totalMonthly()` in `src/lib/utils.ts`.
-- **Charts:** Use `recharts` with `PieChart`, `Pie`, `Cell`, and `Tooltip` for the donut chart. Color each category distinctly.
-- **Dates:** Use native `<input type="date">` for date pickers — or use `@radix-ui/react-date-picker` for a polished experience.
-- **State management:** Use React Context or Zustand for global state (sidebar toggle, theme).
-- **Routing:** React Router v6 with `createBrowserRouter` or `BrowserRouter`.
-- **API responses:** Always return typed objects matching `{ success: boolean; data?: Subscription; error?: string }`.
+### Architecture Decision: SQLite in a Client-Side Framework
+- **Option A (Recommended for workshop):** Use `better-sqlite3` via a thin Node.js API server (Express or Fastify). This keeps the architecture simple and mirrors the shared spec's REST API contract.
+- **Option B:** Embed SQLite in the browser using `sql.js` (pure JS WASM build) — possible but adds complexity. Not recommended for workshop unless explicitly desired.
 
----
+### Database & Schema
+- Use Drizzle ORM (`better-sqlite3` driver) for schema definitions + migrations.
+- Run migrations on server startup; seed 5 sample subscriptions if table is empty.
+
+### Data Layer
+- Custom hooks in `src/lib/hooks/useSubscriptions.ts`:
+  - `useSubscriptions()` — fetch with category/status query params
+  - `useCreateSubscription()` / `useUpdateSubscription()` / `useDeleteSubscription()` — mutations
+- Validation: `zod` schemas for all API payloads, used both client-side (React Hook Form resolver) and server-side.
+
+### UI Components (tsx)
+| Component | File | Notes |
+|-----------|------|-------|
+| Layout | `Layout.tsx` | Sidebar + `<Outlet>` wrapper. Collapse sidebar on mobile via state toggle. |
+| Stat Card | `StatCard.tsx` | Receives `title`, `value`, icon. Use shadcn `Card` + `CardContent`. |
+| Donut Chart | `DonutChart.tsx` | `recharts` `PieChart` → `Pie` → `Cell[]` + `Tooltip`. Color map from category constants. |
+| Renewal List | `RenewalList.tsx` | Map over upcoming renewals slice; display with `div` list or shadcn `Card` list. |
+| Table | `SubscriptionTable.tsx` | `@tanstack/react-table` for sorting/filtering/state management. Headless approach gives full Tailwind control. |
+| Modal Form | `SubscriptionModal.tsx` | shadcn `Dialog` + `Form` (React Hook Form + zod). Controlled via parent visibility state. |
+
+### Routing
+- React Router v6 with `createBrowserRouter` for client-side routing.
+- Routes: `/` (Dashboard), `/subscriptions`, `/settings`.
+
+### Business Logic
+- Put calculations in `src/lib/utils.ts`:
+  - `annualEquivalent(cost: number, frequency: string): number`
+  - `monthlyEquivalent(cost: number, frequency: string): number`
+  - `totalMonthly(subscriptions: Subscription[]): number`
 
 ## shadcn/ui Component Setup
 
@@ -139,8 +121,6 @@ Install the components used in this project:
 ```bash
 npx shadcn@latest add button card input label select dialog table textarea
 ```
-
----
 
 ## Tailwind CSS Configuration
 
@@ -166,8 +146,6 @@ export default {
   plugins: [],
 }
 ```
-
----
 
 ## Reference
 
