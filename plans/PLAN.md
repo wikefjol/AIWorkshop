@@ -195,8 +195,40 @@ All frameworks progress through the same five phases in order. Each phase must p
 
 ---
 
+## 8. Optional Workshop Challenges (Bonus)
+
+These are optional challenges participants can attempt after completing Phases 1–5. They are designed to be implemented across all frameworks so teams can compare approaches. Difficulty ranges from easy to hard.
+
+### Challenge 1: Dark Mode Toggle *(Easy)*
+Add a theme switcher in the sidebar that toggles between light and dark mode. Persist the preference in `localStorage` (or cookies for server-rendered frameworks). All frameworks must use the same dark color palette.
+
+**Teaches:** CSS variables, framework theming, client vs server state, localStorage vs cookie patterns.
+
+### Challenge 2: Toast Notifications *(Easy-Medium)*
+Add non-blocking toast notifications for every CRUD operation (e.g., "Subscription created", "Subscription deleted", "Error: cost must be > 0"). Toasts should auto-dismiss after 3 seconds with a slide-in animation.
+
+**Teaches:** Ephemeral UI state, animation patterns, cross-framework notification systems, error UX.
+
+### Challenge 3: Export Subscriptions to CSV *(Medium)*
+Add an "Export CSV" button on the subscriptions list page. The exported file should include all columns, respect current filters, and be downloadable as `subscriptions-YYYY-MM-DD.csv`.
+
+**Teaches:** File generation, Blob/Stream API differences, server-side vs client-side file creation, encoding.
+
+### Challenge 4: Debounced Search *(Medium-Hard)*
+Add a search input on the subscriptions list that filters by name in real-time with a 300ms debounce. The search should highlight matching text and show result count.
+
+**Teaches:** Debouncing/throttling patterns, text highlighting, server-side vs client-side search tradeoffs, framework-specific event handling.
+
+### Challenge 5: Real-time Dashboard Updates via WebSockets *(Hard)*
+When one instance updates a subscription, all other open browser tabs should see the dashboard stats and table update instantly without page refresh. Use WebSockets (or Server-Sent Events) to push changes.
+
+**Teaches:** Real-time communication, WebSocket vs SSE tradeoffs, framework-specific real-time patterns (SvelteKit hooks, Go goroutines, Blazor Circuit, React state), concurrency handling.
+
+---
+
 ## 💡 Workshop Flow
 1. Build the **SvelteKit reference implementation** first — it serves as the visual/functional reference for all others.
 2. Progress through Phases 1–5 in order; each phase produces a working result.
 3. Team members then replicate the same phases in Go, Blazor, or React, using SvelteKit's output as the UI design reference.
 4. New frameworks can be added at any time by creating a new folder under `subscription-app/`.
+5. After completing core phases, teams can tackle **optional challenges** from section 8 to compare framework approaches.
