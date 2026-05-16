@@ -137,39 +137,66 @@ All frameworks must produce the **same visual output**. Here is the design refer
 ### "Savings Potential" Feature (Bonus)
 - If a subscription has been active for > 1 year, display a "Cancel & Save" button showing the annual cost in red.
 
-## 7. Implementation Phases
+## 7. Implementation Phases (Framework-Agnostic Blueprint)
 
-### Phase 1: SvelteKit (Reference Implementation)
-Build the complete app. This becomes the visual and functional reference for all other frameworks.
+All frameworks progress through the same five phases in order. Each phase must produce a working, runnable result before moving to the next.
 
-**Step 1.1: Setup & Schema**
-> Initialize SvelteKit with TypeScript, Tailwind CSS, `shadcn-svelte`, Drizzle ORM, and SQLite. Create the `subscriptions` schema.
+### Phase 1: Foundation & Scaffold
+> Set up the project structure, install dependencies, configure Tailwind CSS, define the SQLite schema, and seed data. Verify the app runs successfully.
 
-**Step 1.2: CRUD Operations**
-> Create SvelteKit Form Actions for Create, Update, Delete. Use `superValidate` for form validation.
+**Key checks:**
+- Project scaffolds with correct package/module setup
+- `tailwind.config.js` uses the shared color palette (primary `#4F46E5`, background `#F9FAFB`, text `#111827`)
+- SQLite database file created with `subscriptions` table matching the shared schema
+- 5 sample subscriptions seeded on first run
+- App launches without errors (`npm run dev` / `go run` / `dotnet run`)
 
-**Step 1.3: Dashboard UI**
-> Build the Dashboard layout with Hero Stats cards, category breakdown donut chart, and upcoming renewals list.
+### Phase 2: API Layer (CRUD Endpoints)
+> Implement full Create, Read, Update, Delete endpoints with input validation and consistent JSON responses.
 
-**Step 1.4: Subscription List**
-> Build the Subscription List page with sortable table, filters by category/status, and Edit/Delete actions.
+**Endpoints:**
+| Method | Path | Operation |
+|--------|------|-----------|
+| GET | `/api/subscriptions` | List all (with category/status query params for filtering) |
+| GET | `/api/subscriptions/:id` | Get single subscription |
+| POST | `/api/subscriptions` | Create new subscription |
+| PUT | `/api/subscriptions/:id` | Update existing subscription |
+| DELETE | `/api/subscriptions/:id` | Delete subscription |
 
-**Step 1.5: Polish**
-> Add the Add Subscription modal, validate inputs, ensure responsive design. This completes the reference implementation.
+**Response shape (all endpoints):** `{ "success": boolean, "data"?: any, "error"?: string }`
 
-### Phase 2: Go (Future)
-> Replicate the SvelteKit app's UI and functionality using Go. Match the same layout, colors, chart styles, and interactions.
+### Phase 3: Dashboard View
+> Build the homepage with navigation layout, hero stats cards, category breakdown chart, and upcoming renewals list.
 
-### Phase 3: .NET/Blazor (Future)
-> Replicate the SvelteKit app's UI and functionality using Blazor. Match the same layout, colors, chart styles, and interactions.
+**Deliverables:**
+- Sidebar navigation (Dashboard, Subscriptions, Settings)
+- 3 stat cards: Total Monthly Cost, Total Annual Cost, Active Count
+- Donut chart showing spending by category (left column, ~60% width)
+- Upcoming renewals list for next 7 days (right column, ~40% width)
 
-### Phase 4: React (Future)
-> Replicate the SvelteKit app's UI and functionality using React/Vite. Use `shadcn/ui` (React) for visual parity.
+### Phase 4: Subscription List View
+> Build the full subscription management UI with data table, filters, sorting, and modals.
+
+**Deliverables:**
+- Data table with columns: Name, Category, Cost, Frequency, Annual Equivalent, Status, Actions
+- Filter dropdowns for category and status (default to "All")
+- Sortable column headers (default: cost descending)
+- Edit/Delete buttons per row
+- Add/Edit modal form overlay with validation
+
+### Phase 5: Settings & Polish
+> Complete the app with settings page, responsive layout, loading states, error handling, and visual parity.
+
+**Deliverables:**
+- Settings page with "Reset Data" button (clears and re-seeds)
+- Responsive design — collapsible sidebar on mobile
+- Loading states and error handling throughout
+- Validation: cost > 0, name required, inline error messages
 
 ---
 
 ## 💡 Workshop Flow
-1. Start with **Phase 1, Step 1.1** — Build the SvelteKit reference app.
-2. Once complete, the SvelteKit app serves as the **design reference**.
-3. Team members can then pick any framework for Phase 2+ and replicate the UI.
+1. Build the **SvelteKit reference implementation** first — it serves as the visual/functional reference for all others.
+2. Progress through Phases 1–5 in order; each phase produces a working result.
+3. Team members then replicate the same phases in Go, Blazor, or React, using SvelteKit's output as the UI design reference.
 4. New frameworks can be added at any time by creating a new folder under `subscription-app/`.
