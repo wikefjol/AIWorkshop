@@ -1,0 +1,15 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.app h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
