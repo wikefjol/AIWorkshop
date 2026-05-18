@@ -1,0 +1,22 @@
+## Ignore Visual Studio temporary files, build results, and
+## repositories
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Database
+*.db
+*.db-journal
+
+# EF Core Migrations
+Migrations/
+
+# Node modules (for Phase 2)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
