@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "css:build": "postcss BlazorApp/wwwroot/css/site.css -o BlazorApp/wwwroot/css/site.css",
+    "css:watch": "postcss BlazorApp/wwwroot/css/site.css -o BlazorApp/wwwroot/css/site.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.0",
+    "postcss-cli": "^11.0.0"
+  }
+}
