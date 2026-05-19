@@ -3,7 +3,7 @@ import cors from 'cors'
 import { db } from './db/index.js'
 import { subscriptions } from './db/schema.js'
 import { seed } from './db/seed.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, type SQL } from 'drizzle-orm'
 
 const app = express()
 const PORT = 3001
@@ -18,23 +18,13 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/subscriptions', async (req, res) => {
   const { category, status } = req.query
 
-  let query = db.select().from(subscriptions)
+  const conditions: SQL[] = []
+  if (category && category !== 'all') conditions.push(eq(subscriptions.category, category as string))
+  if (status && status !== 'all') conditions.push(eq(subscriptions.status, status as string))
 
-  if (category && category !== 'all') {
-    query = db.select().from(subscriptions).where(eq(subscriptions.category, category as string))
-  }
-  if (status && status !== 'all') {
-    if (category && category !== 'all') {
-      query = db.select().from(subscriptions).where(
-        and(
-          eq(subscriptions.category, category as string),
-          eq(subscriptions.status, status as string)
-        )
-      )
-    } else {
-      query = db.select().from(subscriptions).where(eq(subscriptions.status, status as string))
-    }
-  }
+  const query = conditions.length > 0
+    ? db.select().from(subscriptions).where(and(...conditions))
+    : db.select().from(subscriptions)
 
   try {
     const result = await query
