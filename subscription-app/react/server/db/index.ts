@@ -15,7 +15,7 @@ sqlite.exec(`
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(6)))),
     name TEXT NOT NULL,
     cost REAL NOT NULL,
-    currency TEXT DEFAULT 'USD',
+    currency TEXT DEFAULT 'SEK',
     frequency TEXT NOT NULL DEFAULT 'monthly' CHECK(frequency IN ('daily', 'weekly', 'monthly', 'yearly')),
     category TEXT NOT NULL DEFAULT 'other' CHECK(category IN ('streaming', 'software', 'utilities', 'health', 'other')),
     status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'cancelled')),
