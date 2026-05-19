@@ -1,12 +1,12 @@
 import { db } from './index.js'
 import { subscriptions } from './schema.js'
-import { eq } from 'drizzle-orm'
+import type { NewSubscription } from './schema.js'
 
-const seedData = [
+const seedData: NewSubscription[] = [
   {
     name: 'Netflix',
     cost: 15.99,
-    currency: 'USD',
+    currency: 'SEK',
     frequency: 'monthly',
     category: 'streaming',
     status: 'active',
@@ -16,7 +16,7 @@ const seedData = [
   {
     name: 'Spotify',
     cost: 9.99,
-    currency: 'USD',
+    currency: 'SEK',
     frequency: 'monthly',
     category: 'streaming',
     status: 'active',
@@ -26,7 +26,7 @@ const seedData = [
   {
     name: 'GitHub Pro',
     cost: 4.00,
-    currency: 'USD',
+    currency: 'SEK',
     frequency: 'monthly',
     category: 'software',
     status: 'active',
@@ -36,7 +36,7 @@ const seedData = [
   {
     name: 'Adobe Creative Cloud',
     cost: 54.99,
-    currency: 'USD',
+    currency: 'SEK',
     frequency: 'yearly',
     category: 'software',
     status: 'active',
@@ -46,7 +46,7 @@ const seedData = [
   {
     name: 'Gym Membership',
     cost: 30.00,
-    currency: 'USD',
+    currency: 'SEK',
     frequency: 'monthly',
     category: 'health',
     status: 'active',
