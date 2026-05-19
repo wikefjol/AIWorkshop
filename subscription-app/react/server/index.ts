@@ -67,25 +67,37 @@ app.post('/api/subscriptions', (req, res) => {
   })
 })
 
-app.put('/api/subscriptions/:id', (req, res) => {
+app.put('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
   const data = req.body
 
-  db.update(subscriptions).set(data).where(eq(subscriptions.id, id)).then((result) => {
-    res.json(result)
-  }).catch((err) => {
+  try {
+    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Subscription not found' })
+    }
+
+    const result = await db.update(subscriptions).set(data).where(eq(subscriptions.id, id)).returning()
+    res.json(result[0])
+  } catch (err: any) {
     res.status(500).json({ error: err.message })
-  })
+  }
 })
 
-app.delete('/api/subscriptions/:id', (req, res) => {
+app.delete('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
 
-  db.delete(subscriptions).where(eq(subscriptions.id, id)).then((result) => {
-    res.json(result)
-  }).catch((err) => {
+  try {
+    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Subscription not found' })
+    }
+
+    await db.delete(subscriptions).where(eq(subscriptions.id, id))
+    res.json({ message: 'Subscription deleted' })
+  } catch (err: any) {
     res.status(500).json({ error: err.message })
-  })
+  }
 })
 
 app.delete('/api/subscriptions', (_req, res) => {
