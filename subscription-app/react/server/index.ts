@@ -6,6 +6,7 @@ import { seed } from './db/seed.js'
 import { eq, and, type SQL } from 'drizzle-orm'
 import type { Subscription } from './db/schema.js'
 import { SubscriptionSchema, UpdateSubscriptionSchema, CATEGORIES, STATUSES } from '../src/lib/schema.js'
+import { addClient, broadcast } from './broadcaster.js'
 
 const app = express()
 const PORT = 3001
@@ -15,6 +16,14 @@ app.use(express.json())
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok' } })
+})
+
+app.get('/api/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.write(': connected\n\n')
+  addClient(res, req)
 })
 
 app.get('/api/subscriptions', async (req, res) => {
@@ -73,6 +82,7 @@ app.post('/api/subscriptions', async (req, res) => {
     const [created] = await db.insert(subscriptions).values({
       name, cost, currency, frequency, category, status, startDate, nextBillingDate,
     }).returning()
+    broadcast('subscription:created', JSON.stringify({ id: created.id }))
     res.status(201).json({ success: true, data: created })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
@@ -98,6 +108,7 @@ app.put('/api/subscriptions/:id', async (req, res) => {
       res.status(404).json({ success: false, error: 'Subscription not found' })
       return
     }
+    broadcast('subscription:updated', JSON.stringify({ id: updated.id }))
     res.json({ success: true, data: updated })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
@@ -113,6 +124,7 @@ app.delete('/api/subscriptions/:id', async (req, res) => {
       res.status(404).json({ success: false, error: 'Subscription not found' })
       return
     }
+    broadcast('subscription:deleted', JSON.stringify({ id: deleted.id }))
     res.json({ success: true, data: { id } })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
