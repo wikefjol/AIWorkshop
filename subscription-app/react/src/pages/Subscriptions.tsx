@@ -7,7 +7,9 @@ export default function Subscriptions() {
   useEffect(() => {
     fetch('http://localhost:3001/api/subscriptions')
       .then((res) => res.json())
-      .then((data: unknown[]) => setCount(data.length))
+      .then((data: { success: boolean; data: unknown[] }) => {
+        if (data.success) setCount(data.data.length)
+      })
       .catch(() => setCount(null))
   }, [])
 

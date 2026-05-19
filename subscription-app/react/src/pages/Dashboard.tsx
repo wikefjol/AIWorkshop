@@ -5,7 +5,7 @@ import { DonutChart } from '../lib/components/DonutChart'
 import { RenewalList } from '../lib/components/RenewalList'
 import { totalMonthly, totalAnnual, formatCurrency } from '../lib/utils'
 
-export function Dashboard() {
+export default function Dashboard() {
   const { data, loading, error } = useSubscriptions()
 
   if (loading) {
@@ -53,13 +53,11 @@ export function Dashboard() {
 
       {/* Charts row */}
       <div className="grid grid-cols-5 gap-4">
-        {/* Donut chart — ~60% */}
         <div className="col-span-3 bg-white rounded-[8px] shadow-sm border border-gray-200 p-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Spending by Category</h3>
           <DonutChart subscriptions={data} />
         </div>
 
-        {/* Renewal list — ~40% */}
         <div className="col-span-2 bg-white rounded-[8px] shadow-sm border border-gray-200 p-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Upcoming Renewals</h3>
           <RenewalList subscriptions={data} />
