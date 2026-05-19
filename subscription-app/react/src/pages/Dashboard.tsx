@@ -33,7 +33,7 @@ export default function Dashboard() {
       <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Dashboard</h2>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard
           title="Total Monthly Cost"
           value={formatCurrency(monthly)}
@@ -46,7 +46,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Active Subscriptions"
-          value={String(activeCount)}
+          value={`${activeCount} active`}
           icon={<Activity size={20} />}
         />
       </div>

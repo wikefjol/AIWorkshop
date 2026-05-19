@@ -45,6 +45,7 @@ export default function SubscriptionModal({
   const [form, setForm] = useState<FormData>(defaultForm)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const isEdit = Boolean(subscription)
 
@@ -65,6 +66,7 @@ export default function SubscriptionModal({
         setForm(defaultForm)
       }
       setErrors({})
+      setSaveError(null)
     }
   }, [open, subscription])
 
@@ -88,6 +90,7 @@ export default function SubscriptionModal({
     if (!validate()) return
 
     setSubmitting(true)
+    setSaveError(null)
     try {
       const payload = {
         name: form.name.trim(),
@@ -113,13 +116,14 @@ export default function SubscriptionModal({
       })
 
       if (!res.ok) {
-        throw new Error('Failed to save subscription')
+        const body: { success: boolean; error?: string } = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? 'Failed to save subscription')
       }
 
       onSaved()
       onClose()
     } catch (err) {
-      console.error(err)
+      setSaveError(err instanceof Error ? err.message : 'Failed to save subscription')
     } finally {
       setSubmitting(false)
     }
@@ -296,6 +300,13 @@ export default function SubscriptionModal({
               />
             </div>
           </div>
+
+          {/* Save error */}
+          {saveError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {saveError}
+            </p>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">

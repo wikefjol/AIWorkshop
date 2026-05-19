@@ -34,8 +34,9 @@ export default function SubscriptionTable() {
     try {
       const res = await fetch('http://localhost:3001/api/subscriptions')
       if (!res.ok) throw new Error('Failed to fetch subscriptions')
-      const data: Subscription[] = await res.json()
-      setSubscriptions(data)
+      const json: { success: boolean; data: Subscription[] } = await res.json()
+      if (!json.success) throw new Error('Failed to fetch subscriptions')
+      setSubscriptions(json.data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
