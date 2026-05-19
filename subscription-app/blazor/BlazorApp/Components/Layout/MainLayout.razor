@@ -1,38 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="flex min-h-screen">
-    <aside class="hidden md:flex flex-col w-[220px] h-screen sticky top-0 bg-white border-r border-gray-200">
+    <aside class="fixed top-0 left-0 h-screen w-[220px] bg-white border-r border-gray-200 z-10 flex flex-col">
         <NavMenu />
     </aside>
 
-    <main class="flex-1 min-h-screen bg-background">
-        <div class="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3">
-            <span class="text-lg font-bold text-foreground">Subscription Audit</span>
-            <button @onclick="ToggleMobileMenu" class="text-foreground p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-        </div>
-
-        @if (mobileMenuOpen)
-        {
-            <div class="md:hidden bg-white border-b border-gray-200">
-                <NavMenu OnClose="@(() => mobileMenuOpen = false)" />
-            </div>
-        }
-
-        <div class="p-6 md:p-8">
-            @Body
-        </div>
+    <main class="ml-[220px] min-h-screen bg-background p-8">
+        @Body
     </main>
 </div>
-
-@code {
-    private bool mobileMenuOpen;
-
-    private void ToggleMobileMenu()
-    {
-        mobileMenuOpen = !mobileMenuOpen;
-    }
-}

@@ -1,0 +1,118 @@
+@page "/subscriptions"
+@using BlazorApp.Models
+@using BlazorApp.Services
+@inject SubscriptionService SubscriptionService
+
+<PageTitle>Subscriptions - SubTrack</PageTitle>
+
+@code {
+    private List<Subscription> subscriptions = new();
+    private bool loading = true;
+    private string? error = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            subscriptions = await SubscriptionService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string GetCategoryColor(string category)
+    {
+        return category switch
+        {
+            "streaming" => "bg-blue-50 text-blue-700",
+            "software" => "bg-purple-50 text-purple-700",
+            "utilities" => "bg-yellow-50 text-yellow-700",
+            "health" => "bg-green-50 text-green-700",
+            _ => "bg-gray-50 text-gray-700"
+        };
+    }
+
+    private string FormatCurrency(decimal amount, string currency = "USD")
+    {
+        return amount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+    }
+}
+
+<div class="max-w-6xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-foreground">Subscriptions</h1>
+        <p class="text-sm text-gray-500">@subscriptions.Count total</p>
+    </div>
+
+    @if (loading)
+    {
+        <div class="flex items-center justify-center h-64">
+            <p class="text-gray-500">Loading...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-8">
+            @error
+        </div>
+    }
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-100 bg-gray-50">
+                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                    <th class="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Annual Eqv.</th>
+                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
+                    <th class="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var sub in subscriptions)
+                {
+                    <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 text-sm font-medium text-foreground">@sub.Name</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @GetCategoryColor(sub.Category) capitalize">
+                                @sub.Category
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">
+                            @FormatCurrency(sub.Cost, sub.Currency)
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">
+                            @FormatCurrency(SubscriptionService.AnnualEquivalent(sub.Cost, sub.Frequency))
+                        </td>
+                        <td class="px-4 py-3 capitalize text-sm text-gray-700">@sub.Frequency</td>
+                        <td class="px-4 py-3 text-center">
+                            @if (sub.Status == "active")
+                            {
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Cancelled</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (subscriptions.Count == 0)
+        {
+            <div class="px-4 py-8 text-center">
+                <p class="text-sm text-gray-500">No subscriptions found.</p>
+            </div>
+        }
+    </div>
+</div>

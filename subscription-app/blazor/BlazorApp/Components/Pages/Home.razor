@@ -1,7 +1,128 @@
 ﻿@page "/"
+@using BlazorApp.Models
+@using BlazorApp.Services
+@inject SubscriptionService SubscriptionService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard - SubTrack</PageTitle>
 
-<h1>Hello, world!</h1>
+@code {
+    private List<Subscription> subscriptions = new();
+    private bool loading = true;
+    private string? error = null;
+    private decimal totalMonthly = 0;
+    private decimal totalAnnual = 0;
+    private int activeCount = 0;
+    private List<(string category, decimal amount)> categoryBreakdown = new();
+    private List<Subscription> renewals = new();
 
-Welcome to your new app.
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            subscriptions = await SubscriptionService.GetAllAsync();
+            totalMonthly = await SubscriptionService.TotalMonthlyAsync();
+            totalAnnual = await SubscriptionService.TotalAnnualAsync();
+            activeCount = await SubscriptionService.ActiveCountAsync();
+            renewals = await SubscriptionService.UpcomingRenewalsAsync(7);
+
+            var activeSubs = subscriptions.Where(s => s.Status == "active").ToList();
+            var categoryMap = new Dictionary<string, decimal>();
+            foreach (var sub in activeSubs)
+            {
+                var monthly = SubscriptionService.MonthlyEquivalent(sub.Cost, sub.Frequency);
+                if (categoryMap.ContainsKey(sub.Category))
+                    categoryMap[sub.Category] += monthly;
+                else
+                    categoryMap[sub.Category] = monthly;
+            }
+            categoryBreakdown = categoryMap.OrderBy(k => k.Key).Select(k => (k.Key, k.Value)).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string FormatCurrency(decimal amount, string currency = "USD")
+    {
+        return amount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+    }
+}
+
+@if (loading)
+{
+    <div class="flex items-center justify-center h-64">
+        <p class="text-gray-500">Loading...</p>
+    </div>
+}
+else if (!string.IsNullOrEmpty(error))
+{
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-8">
+        @error
+    </div>
+}
+
+<!-- Hero Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <p class="text-sm font-medium text-gray-500">Total Monthly Cost</p>
+        <p class="text-2xl font-bold mt-2 text-foreground">@FormatCurrency(totalMonthly)</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <p class="text-sm font-medium text-gray-500">Total Annual Cost</p>
+        <p class="text-2xl font-bold mt-2 text-foreground">@FormatCurrency(totalAnnual)</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <p class="text-sm font-medium text-gray-500">Active Count</p>
+        <p class="text-2xl font-bold mt-2 text-foreground">@activeCount active</p>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Spending Breakdown -->
+    <div class="lg:col-span-3 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold mb-4 text-foreground">Spending by Category</h2>
+        <p class="text-sm text-gray-500">Donut chart coming in Phase 3.</p>
+
+        <div class="mt-6 space-y-2">
+            @foreach (var item in categoryBreakdown)
+            {
+                <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <span class="text-sm capitalize text-gray-700">@item.category</span>
+                    <span class="text-sm font-medium text-foreground">@FormatCurrency(item.amount)</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Upcoming Renewals -->
+    <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold mb-4 text-foreground">Upcoming Renewals</h2>
+        @if (renewals.Count == 0)
+        {
+            <p class="text-sm text-gray-500">No subscriptions renewing in the next 7 days.</p>
+        }
+        else
+        {
+            <ul class="space-y-3">
+                @foreach (var renewal in renewals)
+                {
+                    <li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                        <div>
+                            <p class="font-medium text-sm text-foreground">@renewal.Name</p>
+                            <p class="text-xs text-gray-500">@FormatCurrency(renewal.Cost, renewal.Currency) · @renewal.Frequency</p>
+                        </div>
+                        <span class="text-xs font-medium text-primary">
+                            @renewal.NextBillingDate.ToString("MMM dd")
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
