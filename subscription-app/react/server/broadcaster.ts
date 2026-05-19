@@ -12,6 +12,10 @@ export function addClient(res: Response, req: { on: (event: string, listener: ()
 export function broadcast(event: string, data: string): void {
   const message = `event: ${event}\ndata: ${data}\n\n`
   for (const client of clients) {
-    client.write(message)
+    try {
+      client.write(message)
+    } catch {
+      clients.delete(client)
+    }
   }
 }

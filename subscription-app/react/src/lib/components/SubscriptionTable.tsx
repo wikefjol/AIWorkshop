@@ -170,11 +170,14 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
                   >
                     <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
                       <HighlightedText text={sub.name} query={searchQuery} />
-                      {savingsPotential(sub, new Date()) !== null && (
-                        <span className="ml-2 text-xs text-red-600 font-medium">
-                          Cancel & Save {formatCurrency(savingsPotential(sub, new Date())!, sub.currency)}/yr
-                        </span>
-                      )}
+                      {(() => {
+                        const savings = savingsPotential(sub, new Date())
+                        return savings !== null ? (
+                          <span className="ml-2 text-xs text-red-600 font-medium">
+                            Cancel & Save {formatCurrency(savings, sub.currency)}/yr
+                          </span>
+                        ) : null
+                      })()}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${categoryBadgeClass[sub.category]}`}>

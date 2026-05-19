@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Subscription } from '../types'
-import { listSubscriptions } from '../api'
+import { listSubscriptions, BASE_URL } from '../api'
 import { useSSE } from './useSSE'
 
 interface UseSubscriptionsParams {
@@ -37,7 +37,7 @@ export function useSubscriptions(params?: UseSubscriptionsParams): UseSubscripti
     fetchData()
   }, [fetchData])
 
-  useSSE('http://localhost:3001/api/events', fetchData)
+  useSSE(`${BASE_URL}/api/events`, fetchData)
 
   return { data, loading, error, refetch: fetchData }
 }

@@ -2,7 +2,10 @@ import type { Subscription } from './types'
 import { annualEquivalent } from './utils'
 
 function escapeField(value: string): string {
-  return value.includes(',') ? `"${value}"` : value
+  if (value.includes('"') || value.includes(',') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
 }
 
 export function exportToCsv(rows: Subscription[], filename: string): void {

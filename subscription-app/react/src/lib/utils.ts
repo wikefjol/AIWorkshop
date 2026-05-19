@@ -74,8 +74,8 @@ export function spendingByCategory(subs: Subscription[]): Record<string, number>
 export function savingsPotential(sub: Subscription, today: Date): number | null {
   if (sub.status !== 'active') return null
 
-  // Compare purely by calendar date to avoid timezone skew between Date constructors.
-  const todayStr = today.toISOString().slice(0, 10)
+  // Use local date components to avoid UTC offset shifting the date (e.g. UTC-5 at midnight).
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
   const [sy, sm, sd] = sub.startDate.split('-').map(Number)
   const [ty, tm, td] = todayStr.split('-').map(Number)
 

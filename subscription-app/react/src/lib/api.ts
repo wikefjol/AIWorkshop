@@ -1,10 +1,7 @@
 import type { Subscription } from './types'
 import type { SubscriptionInput, UpdateSubscriptionInput } from './schema'
 
-const BASE_URL =
-  typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
-    ? import.meta.env.VITE_API_URL
-    : 'http://localhost:3001'
+export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
 async function handleResponse<T>(response: Response): Promise<T> {
   const json = await response.json()

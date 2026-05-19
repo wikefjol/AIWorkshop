@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, CreditCard, Settings, Menu, X, Sun, Moon } from 'lucide-react'
+import { Toaster } from 'sonner'
 import { useTheme } from '../hooks/useTheme'
 
 const navLinks = [
@@ -91,6 +92,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <Toaster duration={3000} theme={theme} />
     </div>
   )
 }

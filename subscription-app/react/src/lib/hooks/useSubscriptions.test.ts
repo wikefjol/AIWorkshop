@@ -3,6 +3,7 @@ import { useSubscriptions } from './useSubscriptions'
 
 vi.mock('../api', () => ({
   listSubscriptions: vi.fn(),
+  BASE_URL: 'http://localhost:3001',
 }))
 
 import { listSubscriptions } from '../api'

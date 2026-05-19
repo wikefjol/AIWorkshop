@@ -123,4 +123,12 @@ describe('exportToCsv', () => {
     exportToCsv([makeSub()], 'test.csv')
     expect(mockAnchor.remove).toHaveBeenCalledOnce()
   })
+
+  it('escapes double-quote characters per RFC 4180', async () => {
+    let capturedBlob: Blob | null = null
+    ;(URL.createObjectURL as ReturnType<typeof vi.fn>).mockImplementation((blob: Blob) => { capturedBlob = blob; return mockObjectUrl })
+    exportToCsv([makeSub({ name: 'Netflix "Premium"' })], 'test.csv')
+    const lines = (await capturedBlob!.text()).trim().split('\n')
+    expect(lines[1]).toContain('"Netflix ""Premium"""')
+  })
 })
