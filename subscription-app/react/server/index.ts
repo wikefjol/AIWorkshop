@@ -19,6 +19,18 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/subscriptions', async (req, res) => {
   const { category, status } = req.query
 
+  const validCategories: Subscription['category'][] = ['streaming', 'software', 'utilities', 'health', 'other']
+  const validStatuses: Subscription['status'][] = ['active', 'cancelled']
+
+  if (category && category !== 'all' && !validCategories.includes(category as Subscription['category'])) {
+    res.status(400).json({ success: false, error: `Invalid category: ${category}` })
+    return
+  }
+  if (status && status !== 'all' && !validStatuses.includes(status as Subscription['status'])) {
+    res.status(400).json({ success: false, error: `Invalid status: ${status}` })
+    return
+  }
+
   const conditions: SQL[] = []
   if (category && category !== 'all') conditions.push(eq(subscriptions.category, category as Subscription['category']))
   if (status && status !== 'all') conditions.push(eq(subscriptions.status, status as Subscription['status']))
@@ -51,7 +63,7 @@ app.get('/api/subscriptions/:id', async (req, res) => {
 })
 
 app.post('/api/subscriptions', async (req, res) => {
-  const { name, cost, ...rest } = req.body
+  const { name, cost, startDate, nextBillingDate, ...rest } = req.body
   if (!name || typeof name !== 'string' || name.trim() === '') {
     res.status(400).json({ success: false, error: 'Name is required' })
     return
@@ -60,10 +72,18 @@ app.post('/api/subscriptions', async (req, res) => {
     res.status(400).json({ success: false, error: 'Cost must be greater than 0' })
     return
   }
+  if (!startDate || typeof startDate !== 'string') {
+    res.status(400).json({ success: false, error: 'startDate is required' })
+    return
+  }
+  if (!nextBillingDate || typeof nextBillingDate !== 'string') {
+    res.status(400).json({ success: false, error: 'nextBillingDate is required' })
+    return
+  }
 
   try {
-    const result = await db.insert(subscriptions).values({ name: name.trim(), cost, ...rest })
-    res.status(201).json({ success: true, data: result })
+    const [created] = await db.insert(subscriptions).values({ name: name.trim(), cost, startDate, nextBillingDate, ...rest }).returning()
+    res.status(201).json({ success: true, data: created })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }
@@ -71,7 +91,7 @@ app.post('/api/subscriptions', async (req, res) => {
 
 app.put('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
-  const { name, cost, ...rest } = req.body
+  const { name, cost, currency, frequency, category, status, startDate, nextBillingDate } = req.body
   if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
     res.status(400).json({ success: false, error: 'Name cannot be empty' })
     return
@@ -88,8 +108,18 @@ app.put('/api/subscriptions/:id', async (req, res) => {
       return
     }
 
+    const updateData: Partial<Subscription> = {}
+    if (name !== undefined) updateData.name = name.trim()
+    if (cost !== undefined) updateData.cost = cost
+    if (currency !== undefined) updateData.currency = currency
+    if (frequency !== undefined) updateData.frequency = frequency
+    if (category !== undefined) updateData.category = category
+    if (status !== undefined) updateData.status = status
+    if (startDate !== undefined) updateData.startDate = startDate
+    if (nextBillingDate !== undefined) updateData.nextBillingDate = nextBillingDate
+
     const result = await db.update(subscriptions)
-      .set({ ...rest, ...(name !== undefined && { name: name.trim() }), ...(cost !== undefined && { cost }) })
+      .set(updateData)
       .where(eq(subscriptions.id, id))
       .returning()
     res.json({ success: true, data: result[0] })
