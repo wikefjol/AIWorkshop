@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Subscription } from '../types'
+import { listSubscriptions } from '../api'
 
 interface UseSubscriptionsParams {
   category?: string
@@ -22,19 +23,8 @@ export function useSubscriptions(params?: UseSubscriptionsParams): UseSubscripti
     setLoading(true)
     setError(null)
     try {
-      const url = new URL('http://localhost:3001/api/subscriptions')
-      if (params?.category) url.searchParams.set('category', params.category)
-      if (params?.status) url.searchParams.set('status', params.status)
-
-      const response = await fetch(url.toString())
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`)
-      }
-      const json = await response.json()
-      if (!json.success) {
-        throw new Error(json.error ?? 'Unknown error')
-      }
-      setData(json.data)
+      const result = await listSubscriptions({ category: params?.category, status: params?.status })
+      setData(result)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to fetch subscriptions')
     } finally {

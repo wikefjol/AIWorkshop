@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-const API = 'http://localhost:3001'
+import { listSubscriptions, resetSubscriptions } from '../lib/api'
 
 export default function Settings() {
   const navigate = useNavigate()
@@ -10,13 +9,8 @@ export default function Settings() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
-    fetch(`${API}/api/subscriptions`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) {
-          setSubCount(data.data.length)
-        }
-      })
+    listSubscriptions()
+      .then((data) => setSubCount(data.length))
       .catch(() => setSubCount(null))
   }, [])
 
@@ -24,11 +18,7 @@ export default function Settings() {
     setResetting(true)
     setMessage(null)
     try {
-      const res = await fetch(`${API}/api/subscriptions`, { method: 'DELETE' })
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        throw new Error(data.error ?? 'Reset failed')
-      }
+      await resetSubscriptions()
       setMessage({ type: 'success', text: 'Data reset successfully! Refreshing...' })
       setTimeout(() => navigate('/'), 1000)
     } catch (err: any) {

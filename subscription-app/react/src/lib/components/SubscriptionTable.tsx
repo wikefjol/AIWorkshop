@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Pencil, Trash2, Plus, ChevronUp, ChevronDown } from 'lucide-react'
 import type { Subscription } from '../types'
-import { formatCurrency, annualEquivalent } from '../utils'
+import { formatCurrency, annualEquivalent, savingsPotential } from '../utils'
 import SubscriptionModal from './SubscriptionModal'
+import { CATEGORIES, STATUSES } from '../schema'
+import { deleteSubscription } from '../api'
 
 type CategoryFilter = 'all' | Subscription['category']
 type StatusFilter = 'all' | Subscription['status']
@@ -16,11 +18,14 @@ const categoryBadgeClass: Record<Subscription['category'], string> = {
   other: 'bg-gray-50 text-gray-700',
 }
 
-export default function SubscriptionTable() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+interface SubscriptionTableProps {
+  subscriptions: Subscription[]
+  loading: boolean
+  error: string | null
+  onRefetch: () => void
+}
 
+export default function SubscriptionTable({ subscriptions, loading, error, onRefetch }: SubscriptionTableProps) {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [costSortDir, setCostSortDir] = useState<SortDirection>('desc')
@@ -28,34 +33,11 @@ export default function SubscriptionTable() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
-  const fetchSubscriptions = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('http://localhost:3001/api/subscriptions')
-      if (!res.ok) throw new Error('Failed to fetch subscriptions')
-      const json: { success: boolean; data: Subscription[] } = await res.json()
-      if (!json.success) throw new Error('Failed to fetch subscriptions')
-      setSubscriptions(json.data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchSubscriptions()
-  }, [fetchSubscriptions])
-
   async function handleDelete(id: string, name: string) {
     if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return
     try {
-      const res = await fetch(`http://localhost:3001/api/subscriptions/${id}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Failed to delete subscription')
-      await fetchSubscriptions()
+      await deleteSubscription(id)
+      onRefetch()
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete')
     }
@@ -101,11 +83,9 @@ export default function SubscriptionTable() {
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white"
           >
             <option value="all">All Categories</option>
-            <option value="streaming">Streaming</option>
-            <option value="software">Software</option>
-            <option value="utilities">Utilities</option>
-            <option value="health">Health</option>
-            <option value="other">Other</option>
+            {CATEGORIES.map(c => (
+              <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+            ))}
           </select>
 
           {/* Status filter */}
@@ -115,8 +95,9 @@ export default function SubscriptionTable() {
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white"
           >
             <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="cancelled">Cancelled</option>
+            {STATUSES.map(s => (
+              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+            ))}
           </select>
         </div>
 
@@ -188,6 +169,11 @@ export default function SubscriptionTable() {
                   >
                     <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
                       {sub.name}
+                      {savingsPotential(sub, new Date()) !== null && (
+                        <span className="ml-2 text-xs text-red-600 font-medium">
+                          Cancel & Save {formatCurrency(savingsPotential(sub, new Date())!, sub.currency)}/yr
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -248,7 +234,7 @@ export default function SubscriptionTable() {
         open={modalOpen}
         onClose={handleModalClose}
         subscription={editingSubscription}
-        onSaved={fetchSubscriptions}
+        onSaved={onRefetch}
       />
     </div>
   )

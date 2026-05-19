@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import type { Subscription } from '../types'
-import { monthlyEquivalent } from '../utils'
+import { spendingByCategory } from '../utils'
 
 interface DonutChartProps {
   subscriptions: Subscription[]
@@ -15,15 +15,7 @@ const COLORS: Record<string, string> = {
 }
 
 export function DonutChart({ subscriptions }: DonutChartProps) {
-  const active = subscriptions.filter((s) => s.status === 'active')
-
-  const categoryTotals = active.reduce<Record<string, number>>((acc, sub) => {
-    const monthly = monthlyEquivalent(sub.cost, sub.frequency)
-    acc[sub.category] = (acc[sub.category] ?? 0) + monthly
-    return acc
-  }, {})
-
-  const data = Object.entries(categoryTotals).map(([category, value]) => ({
+  const data = Object.entries(spendingByCategory(subscriptions)).map(([category, value]) => ({
     category,
     value,
   }))
