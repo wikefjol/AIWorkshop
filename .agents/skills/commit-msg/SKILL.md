@@ -22,7 +22,7 @@ Read the staged files and produce a short, informative commit title and message 
    - **Body** (optional): 1-3 short lines explaining what and why, not how
      - Wrap at 72 characters
      - Separate from title with a blank line
-5. Output the commit message in this format:
+5. Output the commit message and ask the user if he/she want's to also commit the changes in this format:
 
 ```
 <type>[scope]: <title>
