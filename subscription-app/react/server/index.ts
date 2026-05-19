@@ -50,10 +50,18 @@ app.get('/api/subscriptions/:id', async (req, res) => {
 })
 
 app.post('/api/subscriptions', async (req, res) => {
-  const data = req.body
+  const { name, cost, ...rest } = req.body
+  if (!name || typeof name !== 'string' || name.trim() === '') {
+    res.status(400).json({ success: false, error: 'Name is required' })
+    return
+  }
+  if (typeof cost !== 'number' || cost <= 0) {
+    res.status(400).json({ success: false, error: 'Cost must be greater than 0' })
+    return
+  }
 
   try {
-    const result = await db.insert(subscriptions).values(data)
+    const result = await db.insert(subscriptions).values({ name: name.trim(), cost, ...rest })
     res.status(201).json({ success: true, data: result })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
@@ -62,10 +70,20 @@ app.post('/api/subscriptions', async (req, res) => {
 
 app.put('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
-  const data = req.body
+  const { name, cost, ...rest } = req.body
+  if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
+    res.status(400).json({ success: false, error: 'Name cannot be empty' })
+    return
+  }
+  if (cost !== undefined && (typeof cost !== 'number' || cost <= 0)) {
+    res.status(400).json({ success: false, error: 'Cost must be greater than 0' })
+    return
+  }
 
   try {
-    const result = await db.update(subscriptions).set(data).where(eq(subscriptions.id, id))
+    const result = await db.update(subscriptions)
+      .set({ ...rest, ...(name !== undefined && { name: name.trim() }), ...(cost !== undefined && { cost }) })
+      .where(eq(subscriptions.id, id))
     res.json({ success: true, data: result })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
