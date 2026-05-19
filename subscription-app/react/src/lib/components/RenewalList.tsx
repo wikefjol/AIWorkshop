@@ -29,14 +29,14 @@ export function RenewalList({ subscriptions }: RenewalListProps) {
       {upcoming.map((sub) => (
         <li
           key={sub.id}
-          className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+          className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
         >
           <div>
-            <p className="text-sm font-medium text-gray-800">{sub.name}</p>
-            <p className="text-xs text-gray-500 capitalize">{sub.frequency}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{sub.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{sub.frequency}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-semibold text-gray-800">
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
               {formatCurrency(sub.cost, sub.currency)}
             </p>
             <p className="text-xs text-gray-400">{formatDate(sub.nextBillingDate)}</p>

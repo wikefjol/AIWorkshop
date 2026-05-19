@@ -53,13 +53,13 @@ export default function Dashboard() {
 
       {/* Charts row */}
       <div className="grid grid-cols-5 gap-4">
-        <div className="col-span-3 bg-white rounded-[8px] shadow-sm border border-gray-200 p-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Spending by Category</h3>
+        <div className="col-span-3 bg-white dark:bg-gray-800 rounded-[8px] shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Spending by Category</h3>
           <DonutChart subscriptions={data} />
         </div>
 
-        <div className="col-span-2 bg-white rounded-[8px] shadow-sm border border-gray-200 p-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Upcoming Renewals</h3>
+        <div className="col-span-2 bg-white dark:bg-gray-800 rounded-[8px] shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Upcoming Renewals</h3>
           <RenewalList subscriptions={data} />
         </div>
       </div>

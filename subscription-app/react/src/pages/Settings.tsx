@@ -27,58 +27,61 @@ export default function Settings() {
     }
   }
 
+  const cardClass = 'bg-white dark:bg-gray-800 rounded-[8px] shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6'
+  const headingClass = 'text-base font-semibold text-gray-900 dark:text-gray-100 mb-4'
+  const dtClass = 'text-gray-500 dark:text-gray-400'
+  const ddClass = 'font-medium text-gray-900 dark:text-gray-100'
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Settings</h1>
 
       {/* Card 1 — About */}
-      <div className="bg-white rounded-[8px] shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">About</h2>
+      <div className={cardClass}>
+        <h2 className={headingClass}>About</h2>
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <dt className="text-gray-500">App name</dt>
-            <dd className="font-medium text-gray-900">SubTrack</dd>
+            <dt className={dtClass}>App name</dt>
+            <dd className={ddClass}>SubTrack</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Description</dt>
-            <dd className="font-medium text-gray-900">Phase 5 — Settings & Polish</dd>
+            <dt className={dtClass}>Description</dt>
+            <dd className={ddClass}>Phase 5 — Settings & Polish</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Framework</dt>
-            <dd className="font-medium text-gray-900">React 19 + Vite</dd>
+            <dt className={dtClass}>Framework</dt>
+            <dd className={ddClass}>React 19 + Vite</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Styling</dt>
-            <dd className="font-medium text-gray-900">Tailwind CSS 4</dd>
+            <dt className={dtClass}>Styling</dt>
+            <dd className={ddClass}>Tailwind CSS 4</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Language</dt>
-            <dd className="font-medium text-gray-900">TypeScript</dd>
+            <dt className={dtClass}>Language</dt>
+            <dd className={ddClass}>TypeScript</dd>
           </div>
         </dl>
       </div>
 
       {/* Card 2 — Database Info */}
-      <div className="bg-white rounded-[8px] shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Database Info</h2>
+      <div className={cardClass}>
+        <h2 className={headingClass}>Database Info</h2>
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <dt className="text-gray-500">Backend</dt>
-            <dd className="font-medium text-gray-900">SQLite</dd>
+            <dt className={dtClass}>Backend</dt>
+            <dd className={ddClass}>SQLite</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-gray-500">Total subscriptions</dt>
-            <dd className="font-medium text-gray-900">
-              {subCount === null ? '—' : subCount}
-            </dd>
+            <dt className={dtClass}>Total subscriptions</dt>
+            <dd className={ddClass}>{subCount === null ? '—' : subCount}</dd>
           </div>
         </dl>
       </div>
 
       {/* Card 3 — Danger Zone */}
-      <div className="bg-white rounded-[8px] shadow-sm border border-gray-200 p-6 mb-6">
+      <div className={cardClass}>
         <h2 className="text-base font-semibold text-red-600 mb-2">Danger Zone</h2>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
           This will delete all subscriptions and re-seed with default data.
         </p>
 
