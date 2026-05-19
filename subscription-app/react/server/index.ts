@@ -81,10 +81,17 @@ app.put('/api/subscriptions/:id', async (req, res) => {
   }
 
   try {
+    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
+    if (existing.length === 0) {
+      res.status(404).json({ success: false, error: 'Subscription not found' })
+      return
+    }
+
     const result = await db.update(subscriptions)
       .set({ ...rest, ...(name !== undefined && { name: name.trim() }), ...(cost !== undefined && { cost }) })
       .where(eq(subscriptions.id, id))
-    res.json({ success: true, data: result })
+      .returning()
+    res.json({ success: true, data: result[0] })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }
@@ -94,8 +101,14 @@ app.delete('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    const result = await db.delete(subscriptions).where(eq(subscriptions.id, id))
-    res.json({ success: true, data: result })
+    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
+    if (existing.length === 0) {
+      res.status(404).json({ success: false, error: 'Subscription not found' })
+      return
+    }
+
+    await db.delete(subscriptions).where(eq(subscriptions.id, id))
+    res.json({ success: true, data: { id } })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }
