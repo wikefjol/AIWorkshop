@@ -1,5 +1,5 @@
 import type { Subscription } from '../types'
-import { formatCurrency } from '../utils'
+import { formatCurrency, upcomingRenewals } from '../utils'
 
 interface RenewalListProps {
   subscriptions: Subscription[]
@@ -14,16 +14,7 @@ export function RenewalList({ subscriptions }: RenewalListProps) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const in7Days = new Date(today)
-  in7Days.setDate(today.getDate() + 7)
-
-  const upcoming = subscriptions
-    .filter((s) => {
-      if (s.status !== 'active') return false
-      const billing = new Date(s.nextBillingDate + 'T00:00:00')
-      return billing >= today && billing <= in7Days
-    })
-    .sort((a, b) => a.nextBillingDate.localeCompare(b.nextBillingDate))
+  const upcoming = upcomingRenewals(subscriptions, today, 7)
 
   if (upcoming.length === 0) {
     return (

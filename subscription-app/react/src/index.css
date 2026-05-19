@@ -8,3 +8,11 @@
   --color-danger: #EF4444;
   --radius-card: 8px;
 }
+
+.dark {
+  --color-background: #111827;
+  --color-card: #1F2937;
+  --color-text: #F9FAFB;
+  --color-primary: #4F46E5;
+  --color-border: #374151;
+}

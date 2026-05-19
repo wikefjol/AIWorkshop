@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, Settings, Menu, X } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Settings, Menu, X, Sun, Moon } from 'lucide-react'
+import { Toaster } from 'sonner'
+import { useTheme } from '../hooks/useTheme'
 
 const navLinks = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
@@ -11,6 +13,7 @@ const navLinks = [
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
+  const { theme, toggle } = useTheme()
 
   return (
     <div className="relative min-h-screen">
@@ -61,8 +64,16 @@ export default function Layout() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 flex items-center justify-between">
           <p className="text-[10px] text-gray-400">Phase 5 — Settings & Polish</p>
+          <button
+            onClick={toggle}
+            className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle theme"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
         </div>
       </aside>
 
@@ -81,6 +92,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <Toaster duration={3000} theme={theme} />
     </div>
   )
 }

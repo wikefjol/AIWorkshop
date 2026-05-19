@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Subscription } from '../types'
+import { FREQUENCIES, CATEGORIES, STATUSES } from '../schema'
+import { createSubscription, updateSubscription } from '../api'
 
 interface SubscriptionModalProps {
   open: boolean
@@ -103,27 +106,20 @@ export default function SubscriptionModal({
         nextBillingDate: form.nextBillingDate,
       }
 
-      const url = isEdit
-        ? `http://localhost:3001/api/subscriptions/${subscription!.id}`
-        : 'http://localhost:3001/api/subscriptions'
-
-      const method = isEdit ? 'PUT' : 'POST'
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (!res.ok) {
-        const body: { success: boolean; error?: string } = await res.json().catch(() => ({}))
-        throw new Error(body.error ?? 'Failed to save subscription')
+      if (isEdit) {
+        await updateSubscription(subscription!.id, payload)
+        toast.success('Subscription updated')
+      } else {
+        await createSubscription(payload)
+        toast.success('Subscription created')
       }
 
       onSaved()
       onClose()
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save subscription')
+      const msg = err instanceof Error ? err.message : 'Failed to save subscription'
+      setSaveError(msg)
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }
@@ -232,10 +228,9 @@ export default function SubscriptionModal({
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               >
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
+                {FREQUENCIES.map(f => (
+                  <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -248,11 +243,9 @@ export default function SubscriptionModal({
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               >
-                <option value="streaming">Streaming</option>
-                <option value="software">Software</option>
-                <option value="utilities">Utilities</option>
-                <option value="health">Health</option>
-                <option value="other">Other</option>
+                {CATEGORIES.map(c => (
+                  <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -268,8 +261,9 @@ export default function SubscriptionModal({
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             >
-              <option value="active">Active</option>
-              <option value="cancelled">Cancelled</option>
+              {STATUSES.map(s => (
+                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              ))}
             </select>
           </div>
 
