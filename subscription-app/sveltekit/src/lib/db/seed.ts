@@ -1,5 +1,5 @@
-import { Subscription } from '$lib/types';
 import * as db from '$lib/db';
+import type { Subscription } from '$lib/types';
 
 export const subscriptions: Subscription[] = [
 	{
@@ -59,9 +59,15 @@ export const subscriptions: Subscription[] = [
 	}
 ];
 
+const insertStmt = db.getSqlite().prepare(`
+  INSERT OR IGNORE INTO subscriptions (id, name, cost, currency, frequency, category, status, start_date, next_billing_date)
+  VALUES (@id, @name, @cost, @currency, @frequency, @category, @status, @startDate, @nextBillingDate)
+`);
+
 export function seed() {
-	if (db.getAll().length === 0) {
-		subscriptions.forEach(s => db.create(s));
+	const count = db.getSqlite().prepare('SELECT COUNT(*) as c FROM subscriptions').get() as { c: number };
+	if (count.c === 0) {
+		subscriptions.forEach(s => insertStmt.run(s));
 		console.log('Database seeded with sample data.');
 	}
 }

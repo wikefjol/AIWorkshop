@@ -149,3 +149,8 @@ dist
 package
 
 # End of https://www.toptal.com/developers/gitignore/api/svelte,node
+
+# Database
+subscriptions.db
+subscriptions.db-wal
+subscriptions.db-shm
