@@ -14,11 +14,11 @@ type StatusFilter = 'all' | Subscription['status']
 type SortDirection = 'asc' | 'desc'
 
 const categoryBadgeClass: Record<Subscription['category'], string> = {
-  streaming: 'bg-blue-50 text-blue-700',
-  software: 'bg-purple-50 text-purple-700',
-  utilities: 'bg-yellow-50 text-yellow-700',
-  health: 'bg-green-50 text-green-700',
-  other: 'bg-gray-50 text-gray-700',
+  streaming: 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  software: 'bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+  utilities: 'bg-yellow-50 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+  health: 'bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300',
+  other: 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
 }
 
 interface SubscriptionTableProps {
