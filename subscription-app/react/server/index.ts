@@ -87,6 +87,10 @@ app.post('/api/subscriptions', async (req, res) => {
     res.status(400).json({ success: false, error: 'nextBillingDate must be a valid date (YYYY-MM-DD)' })
     return
   }
+  if (currency !== undefined && (typeof currency !== 'string' || currency.trim() === '')) {
+    res.status(400).json({ success: false, error: 'Currency must be a non-empty string' })
+    return
+  }
   if (frequency !== undefined && !VALID_FREQUENCIES.includes(frequency)) {
     res.status(400).json({ success: false, error: `Invalid frequency: ${frequency}` })
     return
@@ -127,6 +131,10 @@ app.put('/api/subscriptions/:id', async (req, res) => {
     res.status(400).json({ success: false, error: 'Cost must be greater than 0' })
     return
   }
+  if (currency !== undefined && (typeof currency !== 'string' || currency.trim() === '')) {
+    res.status(400).json({ success: false, error: 'Currency must be a non-empty string' })
+    return
+  }
   if (frequency !== undefined && !VALID_FREQUENCIES.includes(frequency)) {
     res.status(400).json({ success: false, error: `Invalid frequency: ${frequency}` })
     return
@@ -164,16 +172,14 @@ app.put('/api/subscriptions/:id', async (req, res) => {
   }
 
   try {
-    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
-    if (existing.length === 0) {
-      res.status(404).json({ success: false, error: 'Subscription not found' })
-      return
-    }
-
     const [updated] = await db.update(subscriptions)
       .set(updateData)
       .where(eq(subscriptions.id, id))
       .returning()
+    if (!updated) {
+      res.status(404).json({ success: false, error: 'Subscription not found' })
+      return
+    }
     res.json({ success: true, data: updated })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
@@ -184,13 +190,11 @@ app.delete('/api/subscriptions/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    const existing = await db.select().from(subscriptions).where(eq(subscriptions.id, id))
-    if (existing.length === 0) {
+    const [deleted] = await db.delete(subscriptions).where(eq(subscriptions.id, id)).returning()
+    if (!deleted) {
       res.status(404).json({ success: false, error: 'Subscription not found' })
       return
     }
-
-    await db.delete(subscriptions).where(eq(subscriptions.id, id))
     res.json({ success: true, data: { id } })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
