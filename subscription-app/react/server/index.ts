@@ -59,6 +59,13 @@ app.get('/api/subscriptions/:id', (req, res) => {
 
 app.post('/api/subscriptions', (req, res) => {
   const data = req.body
+  const { name, cost } = req.body
+  if (!name || typeof name !== 'string' || name.trim() === '') {
+    return res.status(400).json({ error: 'Name is required' })
+  }
+  if (typeof cost !== 'number' || cost <= 0) {
+    return res.status(400).json({ error: 'Cost must be greater than 0' })
+  }
 
   db.insert(subscriptions).values(data).then((result) => {
     res.status(201).json(result)
@@ -70,6 +77,13 @@ app.post('/api/subscriptions', (req, res) => {
 app.put('/api/subscriptions/:id', (req, res) => {
   const { id } = req.params
   const data = req.body
+  const { name, cost } = req.body
+  if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) {
+    return res.status(400).json({ error: 'Name cannot be empty' })
+  }
+  if (cost !== undefined && (typeof cost !== 'number' || cost <= 0)) {
+    return res.status(400).json({ error: 'Cost must be greater than 0' })
+  }
 
   db.update(subscriptions).set(data).where(eq(subscriptions.id, id)).then((result) => {
     res.json(result)
