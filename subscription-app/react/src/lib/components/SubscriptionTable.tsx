@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { Pencil, Trash2, Plus, ChevronUp, ChevronDown } from 'lucide-react'
+import { Pencil, Trash2, Plus, ChevronUp, ChevronDown, Download } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Subscription } from '../types'
 import { formatCurrency, annualEquivalent, savingsPotential } from '../utils'
+import { exportToCsv } from '../csv'
 import SubscriptionModal from './SubscriptionModal'
+import HighlightedText from './HighlightedText'
 import { CATEGORIES, STATUSES } from '../schema'
 import { deleteSubscription } from '../api'
 
@@ -23,23 +26,26 @@ interface SubscriptionTableProps {
   loading: boolean
   error: string | null
   onRefetch: () => void
+  searchQuery?: string
 }
 
-export default function SubscriptionTable({ subscriptions, loading, error, onRefetch }: SubscriptionTableProps) {
+export default function SubscriptionTable({ subscriptions, loading, error, onRefetch, searchQuery = '' }: SubscriptionTableProps) {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [costSortDir, setCostSortDir] = useState<SortDirection>('desc')
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
-  async function handleDelete(id: string, name: string) {
-    if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return
+  async function handleDelete(id: string) {
     try {
       await deleteSubscription(id)
+      toast.success('Subscription deleted')
+      setConfirmingId(null)
       onRefetch()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete')
+      toast.error(err instanceof Error ? err.message : 'Failed to delete')
     }
   }
 
@@ -62,10 +68,15 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
     setCostSortDir((prev) => (prev === 'desc' ? 'asc' : 'desc'))
   }
 
-  // Filter and sort
+  function handleExport() {
+    const today = new Date().toISOString().slice(0, 10)
+    exportToCsv(filtered, `subscriptions-${today}.csv`)
+  }
+
   const filtered = subscriptions
     .filter((s) => categoryFilter === 'all' || s.category === categoryFilter)
     .filter((s) => statusFilter === 'all' || s.status === statusFilter)
+    .filter((s) => !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       const diff = a.cost - b.cost
       return costSortDir === 'asc' ? diff : -diff
@@ -76,7 +87,6 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          {/* Category filter */}
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as CategoryFilter)}
@@ -88,7 +98,6 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
             ))}
           </select>
 
-          {/* Status filter */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
@@ -99,9 +108,17 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
               <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
             ))}
           </select>
+
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            title="Export to CSV"
+          >
+            <Download size={15} />
+            Export CSV
+          </button>
         </div>
 
-        {/* Add button */}
         <button
           onClick={handleAdd}
           className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white text-sm font-medium rounded-md hover:opacity-90 transition-opacity"
@@ -121,37 +138,21 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                 <th
                   className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
                   onClick={toggleCostSort}
                 >
                   <span className="inline-flex items-center gap-1 justify-end">
                     Cost
-                    {costSortDir === 'desc' ? (
-                      <ChevronDown size={14} />
-                    ) : (
-                      <ChevronUp size={14} />
-                    )}
+                    {costSortDir === 'desc' ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
                   </span>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Frequency
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Annual Equivalent
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Annual Equivalent</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -168,7 +169,7 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
                     className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-4 py-3 text-sm font-medium text-[var(--color-text)]">
-                      {sub.name}
+                      <HighlightedText text={sub.name} query={searchQuery} />
                       {savingsPotential(sub, new Date()) !== null && (
                         <span className="ml-2 text-xs text-red-600 font-medium">
                           Cancel & Save {formatCurrency(savingsPotential(sub, new Date())!, sub.currency)}/yr
@@ -176,30 +177,22 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${categoryBadgeClass[sub.category]}`}
-                      >
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${categoryBadgeClass[sub.category]}`}>
                         {sub.category.charAt(0).toUpperCase() + sub.category.slice(1)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-[var(--color-text)]">
                       {formatCurrency(sub.cost, sub.currency)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 capitalize">
-                      {sub.frequency}
-                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600 capitalize">{sub.frequency}</td>
                     <td className="px-4 py-3 text-sm text-right text-[var(--color-text)]">
                       {formatCurrency(annualEquivalent(sub.cost, sub.frequency), sub.currency)}
                     </td>
                     <td className="px-4 py-3">
                       {sub.status === 'active' ? (
-                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                          Active
-                        </span>
+                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">Active</span>
                       ) : (
-                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                          Cancelled
-                        </span>
+                        <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Cancelled</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -212,14 +205,31 @@ export default function SubscriptionTable({ subscriptions, loading, error, onRef
                         >
                           <Pencil size={15} />
                         </button>
-                        <button
-                          onClick={() => handleDelete(sub.id, sub.name)}
-                          className="text-gray-400 hover:text-[var(--color-danger)] transition-colors"
-                          aria-label="Delete"
-                          title="Delete"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        {confirmingId === sub.id ? (
+                          <>
+                            <button
+                              onClick={() => handleDelete(sub.id)}
+                              className="text-xs font-medium text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded transition-colors"
+                            >
+                              Confirm?
+                            </button>
+                            <button
+                              onClick={() => setConfirmingId(null)}
+                              className="text-xs font-medium text-gray-600 hover:text-gray-800 px-2 py-1 rounded border border-gray-300 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmingId(sub.id)}
+                            className="text-gray-400 hover:text-[var(--color-danger)] transition-colors"
+                            aria-label="Delete"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

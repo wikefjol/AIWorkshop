@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Subscription } from '../types'
 import { FREQUENCIES, CATEGORIES, STATUSES } from '../schema'
 import { createSubscription, updateSubscription } from '../api'
@@ -107,14 +108,18 @@ export default function SubscriptionModal({
 
       if (isEdit) {
         await updateSubscription(subscription!.id, payload)
+        toast.success('Subscription updated')
       } else {
         await createSubscription(payload)
+        toast.success('Subscription created')
       }
 
       onSaved()
       onClose()
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Failed to save subscription')
+      const msg = err instanceof Error ? err.message : 'Failed to save subscription'
+      setSaveError(msg)
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }
