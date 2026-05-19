@@ -1,41 +1,34 @@
 # AIWorkshop — GitHub Copilot Instructions
 
-Multi-framework workshop comparing implementation of the same subscription tracking app across SvelteKit, Go, Blazor, and React.
+When generating commit messages, follow the Conventional Commits specification (https://www.conventionalcommits.org/en/v1.0.0/).
 
-## Structure
+## Commit Message Format
 
 ```
-AIWorkshop/
-├── plans/
-│   └── PLAN.md            ← Master plan: phased implementation (read first)
-├── AGENTS.md              ← Project navigation & how to work here
-├── subscription-app/
-│   ├── AGENTS.md          ← Shared spec: data model, UI/UX, business logic
-│   ├── sveltekit/         ← Reference implementation (build first, others match this)
-│   │   └── AGENTS.md
-│   ├── go/
-│   │   └── AGENTS.md
-│   ├── blazor/
-│   │   └── AGENTS.md
-│   └── react/
-│       └── AGENTS.md
+<type>[optional scope]: <description>
+
+[optional body]
 ```
 
-Each framework folder is self-contained with its own dependencies and build system.
+## Types
 
-## How to work here
+- `feat` — new feature
+- `fix` — bug fix
+- `docs` — documentation changes
+- `style` — code style changes (formatting, semicolons, etc.)
+- `refactor` — code refactoring
+- `perf` — performance improvements
+- `test` — test additions or changes
+- `build` — build system or dependency changes
+- `ci` — CI configuration changes
+- `chore` — maintenance tasks
+- `revert` — reverting previous commits
 
-1. Always read `subscription-app/AGENTS.md` first for the shared spec.
-2. Then read the framework-specific `AGENTS.md` in that folder.
-3. When in doubt about UI/UX, reference the **SvelteKit** code — it is the reference implementation.
-4. All frameworks must produce the same visual output and share the same data model (SQLite + subscriptions table).
+## Guidelines
 
-## Commands
-
-Commands are framework-specific — each `AGENTS.md` lists its own setup and dev commands.
-
-## Key facts
-
-- SvelteKit is the reference — build it first, others match its UI/UX.
-- All frameworks use SQLite, same schema, same color palette (#4F46E5 primary), same seed data.
-- Add new frameworks by creating a new folder under `subscription-app/` with its own `AGENTS.md`.
+- Use imperative mood in the description ("add" not "added")
+- Keep the title under 72 characters
+- Use lowercase after the type/scope colon
+- Include scope for multi-framework projects (e.g., `feat(sveltekit):`, `chore(go):`)
+- Add `!` before colon for breaking changes (e.g., `feat!: breaking API change`)
+- If multiple unrelated changes are staged, suggest splitting into separate commits
