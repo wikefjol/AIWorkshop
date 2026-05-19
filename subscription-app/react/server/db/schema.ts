@@ -7,7 +7,7 @@ export const subscriptions = sqliteTable('subscriptions', {
     .$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull(),
   cost: real('cost').notNull(),
-  currency: text('currency').default('USD'),
+  currency: text('currency').default('SEK'),
   frequency: text('frequency', {
     enum: ['daily', 'weekly', 'monthly', 'yearly']
   }).notNull().default('monthly'),
