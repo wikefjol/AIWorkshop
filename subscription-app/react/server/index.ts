@@ -4,6 +4,7 @@ import { db } from './db/index.js'
 import { subscriptions } from './db/schema.js'
 import { seed } from './db/seed.js'
 import { eq, and, type SQL } from 'drizzle-orm'
+import type { Subscription } from './db/schema.js'
 
 const app = express()
 const PORT = 3001
@@ -19,8 +20,8 @@ app.get('/api/subscriptions', async (req, res) => {
   const { category, status } = req.query
 
   const conditions: SQL[] = []
-  if (category && category !== 'all') conditions.push(eq(subscriptions.category, category as string))
-  if (status && status !== 'all') conditions.push(eq(subscriptions.status, status as string))
+  if (category && category !== 'all') conditions.push(eq(subscriptions.category, category as Subscription['category']))
+  if (status && status !== 'all') conditions.push(eq(subscriptions.status, status as Subscription['status']))
 
   const query = conditions.length > 0
     ? db.select().from(subscriptions).where(and(...conditions))
